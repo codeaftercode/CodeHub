@@ -138,7 +138,7 @@ public class STabbedPane extends JTabbedPane {
     class STabbedPaneUI extends BasicTabbedPaneUI {  
         private Rectangle[] closeRects = new Rectangle[0];  
         private int nowIndex = -1;  
-        private int oldIndex = -1;  
+        //private int oldIndex = -1;  
   
         public STabbedPaneUI() {  
             super();  
