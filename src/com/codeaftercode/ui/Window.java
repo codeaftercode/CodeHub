@@ -9,7 +9,6 @@ import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 

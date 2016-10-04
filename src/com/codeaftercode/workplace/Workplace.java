@@ -95,6 +95,8 @@ public class Workplace {
 			showViewGroups();
 			if(viewGroups.getArrayList().contains(showFolderCheckBoxMenuItem)) {
 				// 如果存在已经打开的文件夹,不要重复打开,确保viewGroups.arrayList中不含重复项,否则关闭时可能出错
+				// 好像不用删除也会自动去除重复
+				viewGroups.removeTab(viewGroups.getArrayList().indexOf(showFolderCheckBoxMenuItem));
 				viewGroups.addTab("文件夹", null, new FileTreePanel(window, folder), null, true, showFolderCheckBoxMenuItem);
 				return;
 			} else {

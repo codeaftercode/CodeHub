@@ -6,8 +6,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-
-import javax.swing.JScrollPane;
 /**
  * 变量说明: scrollPane --JScrollPane
  * 显示行号：
@@ -44,6 +42,13 @@ public class LineNumberHeaderView extends javax.swing.JComponent {
         setBackground(DEFAULT_BACKGROUD);
         setPreferredSize(9999);
     }
+    
+    public LineNumberHeaderView(Font font) {
+        setFont(font);
+        setForeground(DEFAULT_FOREGROUD);
+        setBackground(DEFAULT_BACKGROUD);
+        setPreferredSize(9999);
+    }
 
     public void setPreferredSize(int row) {
         int width = fontMetrics.stringWidth(String.valueOf(row));
@@ -56,7 +61,8 @@ public class LineNumberHeaderView extends javax.swing.JComponent {
     @Override
     public void setFont(Font font) {
         super.setFont(font);
-        fontMetrics = getFontMetrics(getFont());
+//        fontMetrics = getFontMetrics(getFont());
+        fontMetrics = getFontMetrics(font);
         fontLineHeight = fontMetrics.getHeight();
     }
 
@@ -77,7 +83,7 @@ public class LineNumberHeaderView extends javax.swing.JComponent {
         //调整首行行号上边距
     	//JTextArea与JTextPane设置不同,此处也应调整
     	//应根据右侧文本区设置此参数;
-    	return 5;
+    	return 2;
     }
 
     @Override
