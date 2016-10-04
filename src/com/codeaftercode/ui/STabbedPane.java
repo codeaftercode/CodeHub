@@ -38,20 +38,19 @@ public class STabbedPane extends JTabbedPane {
     private Color colorNorth = new Color(57, 181, 215);  
     private Color colorSouth = new Color(145, 232, 255);  
     private Color colorBorder = new Color(90, 154, 179);  
-  
     /** 
      * 构造方法 
      */  
     public STabbedPane() {  
         super();  
         initialize();  
-    }  
+    }
   
     /** 
      * 构造方法 
      * @param arg0 该参数为true时，无论是否选中，都显示可关闭按钮， 
      * 为false时，只有选中时才显示 
-     */  
+     */
     public STabbedPane(boolean arg0) {  
         super();  
         showClose = arg0;  
@@ -71,8 +70,7 @@ public class STabbedPane extends JTabbedPane {
      * @param tip 提示信息 
      * @param closabel 是否可关闭 
      */  
-    public void addTab(String title, Icon icon, Component component,  
-            String tip, boolean closable) {  
+    public void addTab(String title, Icon icon, Component component, String tip, boolean closable) {  
         addTab(title, icon, component, tip);
         this.closable.add(closable);  
     }  
@@ -153,8 +151,7 @@ public class STabbedPane extends JTabbedPane {
                 public void mousePressed(MouseEvent e) {  
                     for (int i = 0; i < getTabCount(); i++) {
                     	//关闭选项卡
-                        if (closeRects[i].contains(e.getPoint())
-                                && closable.get(i)) {  
+                        if (closeRects[i].contains(e.getPoint()) && closable.get(i)) {  
                             removeTab(i);  
                         }
                     }

@@ -16,17 +16,57 @@ public class FileModularActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if(source == fileModualr.newTextMenuItem) {
-			//新建纯文本文件
+			// 新建纯文本文件
 			fileModualr.newText();
 			return;
 		}
 		if(source == fileModualr.openMenuItem) {
-			//打开文件
+			// 打开文件
 			try {
 				fileModualr.openFile();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			return;
+		}
+		if(source == fileModualr.openFolderMenuItem) {
+			// 打开文件夹
+			fileModualr.openFolder();
+			return;
+		}
+		if(source == fileModualr.saveMenuItem) {
+			// 保存
+			
+			return;
+		}
+		if(source == fileModualr.saveWithEncodingMenuItem) {
+			// 以指定编码保存
+			
+			return;
+		}
+		if(source == fileModualr.saveAsMenuItem) {
+			// 另存为
+			
+			return;
+		}
+		if(source == fileModualr.saveAllMenuItem) {
+			// 全部保存
+			
+			return;
+		}
+		if(source == fileModualr.closeFileMenuItem) {
+			// 关闭
+			
+			return;
+		}
+		if(source == fileModualr.closeAllFileMenuItem) {
+			// 全部关闭
+			
+			return;
+		}
+		if(source == fileModualr.exitMenuItem) {
+			// 退出
+			
 			return;
 		}
 

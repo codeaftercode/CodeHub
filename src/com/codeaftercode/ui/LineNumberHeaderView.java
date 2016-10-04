@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+
+import javax.swing.JScrollPane;
 /**
  * 变量说明: scrollPane --JScrollPane
  * 显示行号：
@@ -19,17 +21,21 @@ import java.awt.Rectangle;
 public class LineNumberHeaderView extends javax.swing.JComponent {
 
     /**
-	 * 
+	 * 行号高度与文本区行高不一致,会导致左右无法对齐
+	 * 应设置行号高度,与得文本区行高一致
 	 */
 	private static final long serialVersionUID = 1L;
-	private final  Font DEFAULT_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 13);
-    public final Color DEFAULT_BACKGROUD = new Color(228, 228, 228);
-    public final Color DEFAULT_FOREGROUD = Color.BLACK;
+	//private final  Font DEFAULT_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+    //public final Color DEFAULT_BACKGROUD = new Color(228, 228, 228);
+    //public final Color DEFAULT_FOREGROUD = Color.BLACK;
+	private final  Font DEFAULT_FONT = Window.lineNumber;		//必须与JTextArea字体一致,否则行号无法对齐
+	public final Color DEFAULT_BACKGROUD = new Color(0x272822);
+	public final Color DEFAULT_FOREGROUD = new Color(0xA49C9C);
     public final int nHEIGHT = Integer.MAX_VALUE - 1000000;
     public final int MARGIN = 5;
-    private int lineHeight;
-    private int fontLineHeight;
-    private int currentRowWidth;
+    private int lineHeight;										//行高
+    private int fontLineHeight;									//字体高
+    private int currentRowWidth;								//当前行宽
     private FontMetrics fontMetrics;
 
     public LineNumberHeaderView() {
@@ -68,7 +74,10 @@ public class LineNumberHeaderView extends javax.swing.JComponent {
     }
 
     public int getStartOffset() {
-        return 4;
+        //调整首行行号上边距
+    	//JTextArea与JTextPane设置不同,此处也应调整
+    	//应根据右侧文本区设置此参数;
+    	return 5;
     }
 
     @Override

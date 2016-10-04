@@ -1,5 +1,6 @@
 package com.codeaftercode.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -8,16 +9,14 @@ import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextPane;
+import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
 import com.codeaftercode.edit.EditModular;
 import com.codeaftercode.file.FileModular;
 import com.codeaftercode.help.HelpModular;
+import com.codeaftercode.statusbar.StatusBar;
 import com.codeaftercode.tools.ToolsModular;
 /**
  * 
@@ -33,6 +32,7 @@ public class Window extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	// 默认字体
+	public static Font lineNumber = new Font("微软雅黑", Font.BOLD, 16);
 	private Font globalFont = new Font("微软雅黑", Font.BOLD, 16);
 	private Font workspaceFont = new Font("Consolas", Font.BOLD, 18);
 	// 默认编码表
@@ -51,9 +51,10 @@ public class Window extends JFrame {
 	public static WindowActionListener windowActionListener;
 	/*********** 主工作区 *************/
 	Workplace workplace;
-
 	/*********** 工具栏 *************/
 	// 工具栏:未定义
+	/*********** 状态栏 *************/
+	StatusBar statusBar;
 	/*********** 菜单栏 *************/
 	// 菜单条
 	JMenuBar jMenuBar;
@@ -111,6 +112,11 @@ public class Window extends JFrame {
 
 		/*********** 主工作区 *************/
 		workplace = new Workplace(this);
+
+		/*********** 状态栏 *************/
+		statusBar = new StatusBar(this);
+		this.add(statusBar,BorderLayout.SOUTH);
+		
 
 		// 监听改变窗体大小事件
 		this.addComponentListener(new WindowComponentAdapter(this));
@@ -220,6 +226,14 @@ public class Window extends JFrame {
 		this.jMenuBar = jMenuBar;
 	}
 
+	public StatusBar getStatusBar() {
+		return statusBar;
+	}
+
+	public void setStatusBar(StatusBar statusBar) {
+		this.statusBar = statusBar;
+	}
+
 	public Font getGlobalFont() {
 		return globalFont;
 	}
@@ -242,5 +256,13 @@ public class Window extends JFrame {
 
 	public void setNewFileCounter(int newFileCounter) {
 		this.newFileCounter = newFileCounter;
+	}
+	
+	public Font getFont() {
+		return globalFont;
+	}
+
+	public void setFont(Font font) {
+		this.globalFont = font;
 	}
 }
