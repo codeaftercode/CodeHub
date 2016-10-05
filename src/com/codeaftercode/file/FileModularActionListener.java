@@ -21,12 +21,7 @@ public class FileModularActionListener implements ActionListener {
 			return;
 		}
 		if(source == fileModualr.openMenuItem) {
-			// 打开文件
-			try {
-				fileModualr.openFile();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			fileModualr.openFile();
 			return;
 		}
 		if(source == fileModualr.openFolderMenuItem) {
@@ -36,7 +31,7 @@ public class FileModularActionListener implements ActionListener {
 		}
 		if(source == fileModualr.saveMenuItem) {
 			// 保存
-			
+			fileModualr.saveFile();
 			return;
 		}
 		if(source == fileModualr.saveWithEncodingMenuItem) {
@@ -46,7 +41,7 @@ public class FileModularActionListener implements ActionListener {
 		}
 		if(source == fileModualr.saveAsMenuItem) {
 			// 另存为
-			
+			fileModualr.saveAs();
 			return;
 		}
 		if(source == fileModualr.saveAllMenuItem) {

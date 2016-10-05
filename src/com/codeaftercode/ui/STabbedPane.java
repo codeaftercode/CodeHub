@@ -18,6 +18,8 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.text.View;  
 /**
@@ -34,15 +36,21 @@ import javax.swing.text.View;
 public class STabbedPane extends JTabbedPane {  
     private static final long serialVersionUID = 1L;  
     private Vector<Boolean> closable;  
-    private boolean showClose;  
+    private boolean showClose;
     private Color colorNorth = new Color(57, 181, 215);  
     private Color colorSouth = new Color(145, 232, 255);  
-    private Color colorBorder = new Color(90, 154, 179);  
+    private Color colorBorder = new Color(90, 154, 179);
+    private Window window;
     /** 
      * 构造方法 
      */  
     public STabbedPane() {  
         super();  
+        initialize();  
+    }
+    public STabbedPane(Window window) {  
+        super();  
+        this.window = window;
         initialize();  
     }
   
@@ -73,7 +81,7 @@ public class STabbedPane extends JTabbedPane {
     public void addTab(String title, Icon icon, Component component, String tip, boolean closable) {  
         addTab(title, icon, component, tip);
         this.closable.add(closable);  
-    }  
+    }
   
     /** 
      * 移除组件 
@@ -146,11 +154,11 @@ public class STabbedPane extends JTabbedPane {
         private void initialize() {  
             UIManager.put("TabbedPane.contentAreaColor", colorSouth);  
             
-            //注册鼠标单击事件
+            // 鼠标单击事件
             addMouseListener(new MouseAdapter() {  
                 public void mousePressed(MouseEvent e) {  
                     for (int i = 0; i < getTabCount(); i++) {
-                    	//关闭选项卡
+                    	// 关闭选项卡
                         if (closeRects[i].contains(e.getPoint()) && closable.get(i)) {  
                             removeTab(i);  
                         }
@@ -158,6 +166,17 @@ public class STabbedPane extends JTabbedPane {
                 }
             });
             
+            // 切换选项卡事件
+            addChangeListener(new ChangeListener() {
+            	 public void stateChanged(ChangeEvent e) {
+            		 STabbedPane sTabbedPane = (STabbedPane)e.getSource();
+            		    int selectedIndex = sTabbedPane.getSelectedIndex();
+            		    if(selectedIndex > -1) {
+            		    	//String name = sTabbedPane.getName();
+            		    	window.getStatusBar().getLabel().setText(Integer.toString(selectedIndex));
+            		    }
+            	 }
+            });
            /* //注册鼠标移动事件--不知何用
             addMouseMotionListener(new MouseAdapter() {  
                 public void mouseMoved(MouseEvent e) {  

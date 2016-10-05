@@ -3,18 +3,20 @@ package com.codeaftercode.file;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+
+import org.mozilla.universalchardet.UniversalDetector;
 
 import com.codeaftercode.coding.Hex;
 import com.codeaftercode.ui.LineNumberHeaderView;
@@ -112,8 +114,13 @@ public class FileModular {
 		jScrollPane.setRowHeaderView(new LineNumberHeaderView(new Font("Consolas", Font.BOLD, 18)));
 	}
 
-	protected void openFile() throws IOException {
-		// 打开文件
+
+	/**
+	 * 打开文件
+	 * 调用系统文件选择器选择文件,根据文件类型调用对应的方法打开文件
+	 */
+	protected void openFile(){
+		// 选择文件
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);// 只能选择文件,不能选文件夹
 		jfc.showOpenDialog(window);
@@ -123,54 +130,35 @@ public class FileModular {
 		if (file == null || !file.isFile()) {
 			return;
 		}
-
+		
+		// 选择的文件已经打开
+		// 检测window.getWorkplace().getsTabbedPane()中有没有这个文件,如果有,则不要重复打开,只需切换到此选项卡即可
+		//window.getWorkplace().getsTabbedPane().getComponents().getClass();
+		
+			
+		/** 配置文本显示容器 **/
 		String title = file.getName();
-		// 处理.txt文件
-		if (title.toLowerCase().endsWith(".txt")) {
-			JTextArea jTextArea = new JTextArea();
-			jTextArea.setFont(window.getFont());
-			jTextArea.setBackground(new Color(0x272822));
-			jTextArea.setForeground(new Color(0xFFFFFF));
-			jTextArea.setCaretColor(new Color(0xFFFFFF));
-			JScrollPane jScrollPane = new JScrollPane(jTextArea);
-			window.getWorkplace().getsTabbedPane().addTab(title, null, jScrollPane, title, true);
-			// 切换到新选项卡
-			window.getWorkplace().getsTabbedPane().setSelectedComponent(jScrollPane);
-			// 显示行号--考虑创建JScrollPane的子类,把显示行号功能集成进去,就不用总这样调用方法显示等号
-			// 设置上边距,以保证与左侧行号高度要同
-			jTextArea.setMargin(new Insets(3, 0, 0, 0));
-			jScrollPane.setRowHeaderView(new LineNumberHeaderView());
-			openTxt(file, jTextArea);
-			return;
-		}
-
-		// 处理非.txt文件
-		// 创建文本区
+		String fileType = title.substring(title.lastIndexOf(".")).toLowerCase();
+		// 配置JTextPane:字体,背景色,前景色,光标颜色,光标初始位置
 		JTextPane jTextPane = new JTextPane();
-		// 设置文本区字体
 		jTextPane.setFont(window.getFont());
 		jTextPane.setBackground(new Color(0x272822));
 		jTextPane.setForeground(new Color(0xFFFFFF));
 		jTextPane.setCaretColor(new Color(0xFFFFFF));
-		// 创建滚动面板
+		jTextPane.setCaretPosition(0);
+		// 配置滚动面板,添加行号组件
 		JScrollPane jScrollPane = new JScrollPane(jTextPane);
-		// 添加选项卡
-		window.getWorkplace().getsTabbedPane().addTab(title, null, jScrollPane, title, true);
-		// 切换到新选项卡
-		window.getWorkplace().getsTabbedPane().setSelectedComponent(jScrollPane);
-		// 显示行号--考虑创建JScrollPane的子类,把显示行号功能集成进去,就不用总这样调用方法显示等号
 		jScrollPane.setRowHeaderView(new LineNumberHeaderView());
-
-		// 读取文件
-		/*
-		 * if(title.toLowerCase().endsWith(".java")) { openJava(file,
-		 * jTextPane); return; }
-		 */
-		String fileType = title.substring(title.lastIndexOf(".")).toLowerCase();
+		// 配置选项卡,切换到新选项卡
+		window.getWorkplace().getsTabbedPane().addTab(title, null, jScrollPane, title, true);
+		window.getWorkplace().getsTabbedPane().setSelectedComponent(jScrollPane);
+		
+		/** 读取文件并显示 **/
+		// 如果不把打开文件的处理代码放在一个单独的线程中，打开大文件时界面停止一切响应，直到方法执行完毕。
+		// 单独建立线程的好处是允许用户随时停止该耗时的操作，使界面更加友好。
 		switch (fileType) {
+		case ".txt":
 		case ".java":
-			openJava(file, jTextPane);
-			break;
 		case ".ini":
 		case ".inf":
 		case ".h":
@@ -185,66 +173,89 @@ public class FileModular {
 		case ".htm":
 		case ".php":
 		case ".asp":
-		case ".asm"://汇编
+		case ".asm":// 汇编
 		case ".json":
 		case ".xml":
 		case ".lock":
 		case ".yml":
 		case ".gitignore":
 		case ".gitattributes":
-			openJava(file, jTextPane);
+			new Thread() {
+				public void run() {
+					openText(file, jTextPane);
+				}
+			}.start();
 			break;
 		default:
-			openHexFile(file, jTextPane);
+			// 无法识别的文件类型,用16进制查看器打开
+			new Thread() {
+				public void run() {
+					openHexFile(file, jTextPane);
+				}
+			}.start();
 			break;
 		}
 	}
+	/**
+	 * 文本文件编辑器
+	 * @param file 文件对象
+	 * @param jTextPane 文件显示容器
+	 */
+	public void openText(File file, JTextPane jTextPane) {
+		// 创建字节数组buf[],大小为文件字节数file.length();
+		UniversalDetector detector = new UniversalDetector(null);
+		String encoding = "";
+		int len = (int) file.length();
+		byte[] buf = new byte[len];
+		// 字节流打开文件,一次性读取到字节数组buf[]
+		try (FileInputStream fis = new FileInputStream(file);) {
+			fis.read(buf);
+			// 用juniversalchardet-1.0.3.jar获取编码encoding
+			detector.handleData(buf, 0, len);
+			detector.dataEnd();
+			encoding = detector.getDetectedCharset();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// 如果编码检测失败,则指定为默认字符集
+		encoding = (encoding != null) ? encoding : window.getCharset();
+		// 状态栏
+		window.getStatusBar().getLabel().setText("字符集:" + encoding);
 
-	public void openTxt(File file, JTextArea jTextArea) throws FileNotFoundException, IOException {
-		// 打开.txt文件
-		/*try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), window.getCharset()));) {
-			char[] cbuf = new char[(int) file.length()];//字符流打开文字,无法正确获取文件长度
-			br.read(cbuf);
-			jTextArea.replaceSelection(new String(cbuf));
-			// 设置光标停留位置
-			jTextArea.setCaretPosition(0);
-		}*/
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), window.getCharset()));) {
-			StringBuffer sb = new StringBuffer();
-			String line;
-			while((line = br.readLine()) != null) {
-				sb.append(line + System.lineSeparator());
-			}
-			jTextArea.replaceSelection(new String(sb.toString()));
-			// 设置光标停留位置
-			jTextArea.setCaretPosition(0);
+		try {
+			//jTextPane.replaceSelection(new String(buf, encoding));	此方法太慢
+			jTextPane.setText(new String(buf, encoding));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	public void openJava(File file, JTextPane jTextPane) throws FileNotFoundException, IOException {
-		// 打开.java文件
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), window.getCharset()));) {
-			StringBuffer sb = new StringBuffer();
-			String line;
-			while((line = br.readLine()) != null) {
-				sb.append(line + System.lineSeparator());
-			}
-			jTextPane.replaceSelection(new String(sb.toString()));
-			// 设置光标停留位置
-			jTextPane.setCaretPosition(0);
-		}
-	}
-
-	public void openHexFile(File file, JTextPane jTextPane) throws FileNotFoundException, IOException {
+	/**
+	 * 16进制查看器
+	 * @param file 文件对象
+	 * @param jTextPane 文件显示容器
+	 */
+	public void openHexFile(File file, JTextPane jTextPane) {
 		// 打开16进制文件
 		try (FileInputStream fis = new FileInputStream(file);) {
 			byte[] cbuf = new byte[(int) file.length()];
 			fis.read(cbuf);
 			// 设置一个等宽字体
 			jTextPane.setFont(new Font("Consolas", Font.BOLD, 18));
-			jTextPane.replaceSelection(Hex.toHexString(cbuf, 4, ' '));
+			//jTextPane.replaceSelection(Hex.toHexString(cbuf, 4, ' '));
+			jTextPane.setText(Hex.toHexString(cbuf, 4, ' '));
 			// 设置光标停留位置
-			jTextPane.setCaretPosition(0);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -274,5 +285,20 @@ public class FileModular {
 		// 打开并显示文件夹
 		window.getViewsModular().getShowFolderCheckBoxMenuItem().setState(true);
 		window.getWorkplace().showFolder(folder);
+	}
+
+	public void saveFile() {
+		// 保存文件
+		
+	}
+
+	public void saveAs() {
+		// 文件另存为
+		// 写入准备:字符串,编码
+		
+		// 写入准备:确定文件路径,文件名
+		
+		// 写入文件
+		
 	}
 }

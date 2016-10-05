@@ -31,7 +31,6 @@ public class Workplace {
 	private ViewGroups viewGroups; 
 	// 分栏:
 	private JSplitPane verticalJSplitPane;// 上下分栏,上为文本编辑区,下为命令行
-	
 	private JSplitPane horizontalJSplitPane;// 左右分栏,左为左侧,右为verticalJSplitPane
 	
 	public Workplace(Window window) {
@@ -40,7 +39,7 @@ public class Workplace {
 		
 		
 		// 文本编辑区:
-		sTabbedPane = new STabbedPane();
+		sTabbedPane = new STabbedPane(window);
 		// 命令行:
 		consoleJPanel = new JTextPane();
 		consoleJScrollPane = new JScrollPane(consoleJPanel);
@@ -50,7 +49,6 @@ public class Workplace {
 		viewGroups = new ViewGroups(window);
 		// 分栏:
 		verticalJSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sTabbedPane, consoleJScrollPane);// 上下分栏,上为文本编辑区,下为命令行
-		//horizontalJSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, verticalJSplitPane);// 左右分栏,左为左侧,右为jSplitPane1
 		horizontalJSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, viewGroups, verticalJSplitPane);// 左右分栏,左为左侧,右为jSplitPane1
 		
 		// 设置分栏
