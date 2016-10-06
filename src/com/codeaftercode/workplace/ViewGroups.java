@@ -25,8 +25,8 @@ import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.text.View;
 
-import com.codeaftercode.ui.MyJCheckBoxMenuItem;
-import com.codeaftercode.ui.Window;
+import com.codeaftercode.common.MyJCheckBoxMenuItem;
+import com.codeaftercode.common.Window;
 
 /**
  * 

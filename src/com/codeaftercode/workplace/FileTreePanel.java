@@ -20,7 +20,7 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 
-import com.codeaftercode.ui.Window;
+import com.codeaftercode.common.Window;
 
 /**
  * @author Kirill Grouchnikov

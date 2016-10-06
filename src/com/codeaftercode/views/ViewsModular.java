@@ -1,8 +1,8 @@
 package com.codeaftercode.views;
 
-import com.codeaftercode.ui.MyJCheckBoxMenuItem;
-import com.codeaftercode.ui.MyJMenu;
-import com.codeaftercode.ui.Window;
+import com.codeaftercode.common.MyJCheckBoxMenuItem;
+import com.codeaftercode.common.MyJMenu;
+import com.codeaftercode.common.Window;
 
 public class ViewsModular {
 

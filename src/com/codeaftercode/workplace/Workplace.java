@@ -6,9 +6,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 
-import com.codeaftercode.ui.MyJCheckBoxMenuItem;
-import com.codeaftercode.ui.STabbedPane;
-import com.codeaftercode.ui.Window;
+import com.codeaftercode.common.MyJCheckBoxMenuItem;
+import com.codeaftercode.common.Window;
 
 public class Workplace {
 	private Window window;

@@ -1,8 +1,8 @@
 package com.codeaftercode.help;
 
-import com.codeaftercode.ui.MyJMenu;
-import com.codeaftercode.ui.MyJMenuItem;
-import com.codeaftercode.ui.Window;
+import com.codeaftercode.common.MyJMenu;
+import com.codeaftercode.common.MyJMenuItem;
+import com.codeaftercode.common.Window;
 
 public class HelpModular {
 

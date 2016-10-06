@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import com.codeaftercode.ui.MyJCheckBoxMenuItem;
+import com.codeaftercode.common.MyJCheckBoxMenuItem;
 import com.codeaftercode.workplace.Workplace;
 
 public class ViewsModularActionListener implements ActionListener {

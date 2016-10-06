@@ -2,7 +2,6 @@ package com.codeaftercode.file;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 public class FileModularActionListener implements ActionListener {
 	private FileModular fileModualr;
