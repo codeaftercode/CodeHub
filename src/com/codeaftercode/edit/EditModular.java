@@ -37,8 +37,9 @@ public class EditModular {
 		
 		//向监听器注册事件
 		copyMenuItem.addActionListener(editModularActionListener);
-		
-		//向窗体的JMenuBar添加本菜单
-		window.getJMenuBar().add(editMenu);
+	}
+
+	public MyJMenu getEditMenu() {
+		return editMenu;
 	}
 }

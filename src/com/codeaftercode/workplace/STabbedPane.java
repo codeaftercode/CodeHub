@@ -11,13 +11,14 @@ import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -32,15 +33,16 @@ import com.codeaftercode.common.Window;
  * 添加组件的方法是：
  * public void addTab(String title, Icon icon, Component component, String tip, boolean closable)
  * 移除组件的方法是：
- * public void removeTab(int index)
- * 有个问题：
- * 父类的tabLayoutPolicy参数不能定制，设置为JTabbedPane.SCROLL_TAB_LAYOUT不起作用。
+ * public void removeTabAt(int index)
+ * 存在的问题：
+ * 1.父类的tabLayoutPolicy参数不能定制，设置为JTabbedPane.SCROLL_TAB_LAYOUT不起作用。
  * public JTabbedPane(int tabPlacement, int tabLayoutPolicy)
+ * 2.应禁用父类提供的一些方法,如removeAll()
  */
 public class STabbedPane extends JTabbedPane {  
     private static final long serialVersionUID = 1L;  
-    private Vector<Boolean> closable;  
-    private boolean showClose;
+    private Vector<Boolean> closable;
+    private boolean showClose = false;	//该参数为true时，无论是否选中，都显示可关闭按钮;为false时，只有选中时才显示 
     private Color colorNorth = new Color(57, 181, 215);  
     private Color colorSouth = new Color(145, 232, 255);  
     private Color colorBorder = new Color(90, 154, 179);
@@ -48,32 +50,79 @@ public class STabbedPane extends JTabbedPane {
     /** 
      * 构造方法 
      */  
-    public STabbedPane() {  
-        super();  
-        initialize();  
-    }
     public STabbedPane(Window window) {  
         super();  
         this.window = window;
         initialize();  
     }
   
-    /** 
-     * 构造方法 
-     * @param arg0 该参数为true时，无论是否选中，都显示可关闭按钮， 
-     * 为false时，只有选中时才显示 
-     */
-    public STabbedPane(boolean arg0) {  
-        super();  
-        showClose = arg0;  
-        initialize();  
-    }
-  
     private void initialize() {  
         closable = new Vector<Boolean>(0);  
         setUI(new STabbedPaneUI());  
-    }  
+    }
+    
+    
+    /**
+     * 新建纯文本文件并打开
+     */
+    public void newScrollTextPane() {
+    	window.setNewFileCounter(window.getNewFileCounter() + 1);
+		String title = "新的文档" + window.getNewFileCounter() + ".txt";
+		ScrollTextPane scrollTextPane = new ScrollTextPane(null,this);
+		// 新建选项卡
+		addTab(title, null, scrollTextPane, title, true);
+		setSelectedComponent(scrollTextPane);
+    }
+    
+    
+    /**
+     * 打开文件
+     */
+    public void openFile() {
+    	// 选择文件
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);// 只能选择文件,不能选文件夹
+		jfc.showOpenDialog(window);
+		File file = jfc.getSelectedFile();
+
+		// 取消打开操作
+		if (file == null || !file.isFile()) {
+			return;
+		}
+
+		// 选择的文件已经打开,则不要重复打开,只需切换到此选项卡即可
+		int count = getComponentCount();
+		for (int i = 0; i < count; i++) {
+			ScrollTextPane scrollTextPane = (ScrollTextPane)getComponentAt(i);
+			if (scrollTextPane.getFile() != null && scrollTextPane.getFile().equals(file)) {
+				setSelectedComponent(scrollTextPane);
+				return;
+			}
+		}
+
+		// 创建文本显示容器,读取文件由该容器负责
+		ScrollTextPane scrollTextPane = new ScrollTextPane(file, this);
+		// 配置选项卡,切换到新选项卡
+		addTab(file.getName(), null, scrollTextPane, file.getName(), true);
+		setSelectedComponent(scrollTextPane);
+    }
   
+    /**
+     * 获取索引
+     * @param scrollTextPane
+     * @return 返回值为-1表示传入的组件不在该容器内
+     */
+    public int getTabIndex(ScrollTextPane scrollTextPane) {
+    	int index = this.getTabCount()-1;
+    	while(index > -1) {
+    		if(this.getComponentAt(index).equals(scrollTextPane)) {
+    			break;
+    		}
+    		index--;
+    	}
+    	return index;
+    }
+    
     /** 
      * 加入组件 
      * @param title 标题 
@@ -84,22 +133,93 @@ public class STabbedPane extends JTabbedPane {
      */  
     public void addTab(String title, Icon icon, Component component, String tip, boolean closable) {  
         addTab(title, icon, component, tip);
-        this.closable.add(closable);  
+        this.closable.add(closable);
     }
   
     /** 
-     * 移除组件 
+     * 移除组件
      * @param index 组件序号 
      */  
-    public void removeTab(int index) {  
-        super.removeTabAt(index);  
+    public void removeTabAt(int index) {  
+    	ScrollTextPane scrollTextPane = (ScrollTextPane)this.getComponentAt(index);
+    	// 检查文本内容是否被修改,未修改直接关闭;已修改提示是否保存或取消退出操作
+    	if(scrollTextPane.isChanged()) {
+    		// 文本内容已修改,提示:保存/不保存/取消
+    		String message = "是否保存 " + this.getTitleAt(index) + " 文件的更改?";
+    		int result = JOptionPane.showOptionDialog(window, message, null, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+    		switch(result) {
+    		case JOptionPane.YES_OPTION:
+    			// 保存
+    			if(!scrollTextPane.saveFile()) {
+    				// 保存未完成,取消关闭操作,直接返回
+    				return;
+    			}
+    			break;
+    		case JOptionPane.NO_OPTION:
+    			// 不保存,直接关闭
+    			break;
+    		case JOptionPane.CANCEL_OPTION:
+    			// 取消关闭操作,直接返回
+    			return;
+    		default:
+    			break;
+    		}
+    	}
+    	super.removeTabAt(index);  
         closable.remove(index);  
         // 如果全部关闭,则清空状态栏信息
         if(getTabCount() < 1) {
-        	window.getStatusBar().getLabel().setText("");
-        	window.getStatusBar().getCharset().setText("");
+        	Window.statusBar.getLabel().setText("");
+        	Window.statusBar.getCharset().setText("");
         }
     }
+    
+    public void removeAll() {
+    	int count = getTabCount();
+		while(count-- > 0) {
+			setSelectedIndex(0);
+			removeTabAt(0);
+		}
+    }
+    
+    public void saveSelectedTab() {
+    	// 保存
+    	if(getTabCount() < 1) {
+    		return;
+    	}
+    	ScrollTextPane scrollTextPane = (ScrollTextPane)getSelectedComponent();
+    	scrollTextPane.saveFile();
+    }
+
+	public void saveSelectedTabAs() {
+		// 另存为
+		if(getTabCount() < 1) {
+			return;
+		}
+		ScrollTextPane scrollTextPane = (ScrollTextPane)getSelectedComponent();
+    	scrollTextPane.saveFileAs();
+	}
+	
+	public void saveAllTab() {
+		// 全部保存
+		int count = getTabCount();
+		for(int index = 0;index < count;index++) {
+			ScrollTextPane scrollTextPane = (ScrollTextPane)getComponentAt(index);
+			scrollTextPane.saveFile();
+		}
+		
+	}  
+    
+	public void reloadCharset() {
+		if(getTabCount() < 1) {
+			return;
+		}
+		ScrollTextPane scrollTextPane = (ScrollTextPane)getSelectedComponent();
+		scrollTextPane.reloadCharset();
+	}
+
+
+    
   
     /** 
      * 获得渐变的tab的顶部色彩 
@@ -169,7 +289,7 @@ public class STabbedPane extends JTabbedPane {
                     for (int i = 0; i < getTabCount(); i++) {
                     	// 关闭选项卡
                         if (closeRects[i].contains(e.getPoint()) && closable.get(i)) {  
-                            removeTab(i);  
+                            removeTabAt(i);  
                         }
                     }
                 }
@@ -181,8 +301,8 @@ public class STabbedPane extends JTabbedPane {
             		 STabbedPane sTabbedPane = (STabbedPane)e.getSource();
             		 ScrollTextPane scrollTextPane = (ScrollTextPane)sTabbedPane.getSelectedComponent();
             		 if(scrollTextPane != null) {
-            			 window.getStatusBar().getLabel().setText("");
-            			 window.getStatusBar().getCharset().setText(scrollTextPane.getCharset());
+            			 Window.statusBar.getLabel().setText("");
+            			 Window.statusBar.getCharset().setText(scrollTextPane.getCharset());
             		 }
             	 }
             });
@@ -614,5 +734,6 @@ public class STabbedPane extends JTabbedPane {
                 }  
             }  
         }  
-    }  
+    }
+
 }

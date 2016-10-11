@@ -1,19 +1,13 @@
 package com.codeaftercode.workplace;
 
-import java.io.File;
-
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 
-import com.codeaftercode.common.MyJCheckBoxMenuItem;
 import com.codeaftercode.common.Window;
 
 public class Workplace {
 	private Window window;
-	// 文本编辑区:
-	// JTextPane jTextPane;
-	// JScrollPane jScrollPane;
 	// 默认分栏分隔符宽度
 	private int DividerSize = 5;
 	// 默认垂直分栏(左右分栏)比例
@@ -22,6 +16,7 @@ public class Workplace {
 	private double horizontalDividerLocation = 0.2;
 	
 	
+	// 文本编辑区:
 	private STabbedPane sTabbedPane;
 	// 命令行:
 	private JTextPane consoleJPanel;
@@ -54,7 +49,7 @@ public class Workplace {
 		window.add(horizontalJSplitPane);
 		verticalJSplitPane.setDividerSize(DividerSize);
 		horizontalJSplitPane.setDividerSize(DividerSize);
-		showViewGroups();
+		closeViewGroups();
 		showConsole();
 	}
 	
@@ -80,55 +75,16 @@ public class Workplace {
 		}
 	}
 	
-	public void showFolder() {
-		showFolder(null);
-	}
-	public void showFolder(File folder) {
-		MyJCheckBoxMenuItem showFolderCheckBoxMenuItem = window.getViewsModular().getShowFolderCheckBoxMenuItem();
-		if(showFolderCheckBoxMenuItem != null && showFolderCheckBoxMenuItem.getState()) {
-			// 显示文件夹
-			// 如果视图组被关闭,应先打开视图组
-			window.getViewsModular().getShowViewGroupsCheckBoxMenuItem().setState(true);
-			showViewGroups();
-			if(viewGroups.getArrayList().contains(showFolderCheckBoxMenuItem)) {
-				// 如果存在已经打开的文件夹,不要重复打开,确保viewGroups.arrayList中不含重复项,否则关闭时可能出错
-				// 好像不用删除也会自动去除重复
-				viewGroups.removeTab(viewGroups.getArrayList().indexOf(showFolderCheckBoxMenuItem));
-				viewGroups.addTab("文件夹", null, new FileTreePanel(window, folder), null, true, showFolderCheckBoxMenuItem);
-				return;
-			} else {
-				// 如果不存在已经打开的文件夹
-				viewGroups.addTab("文件夹", null, new FileTreePanel(window, folder), null, true, showFolderCheckBoxMenuItem);
-			}
-		}else {
-			// 关闭文件夹
-			if(viewGroups.getArrayList().contains(showFolderCheckBoxMenuItem)) {
-				// 如果存在已经打开的文件夹,则从viewGroups中移除
-				int index = viewGroups.getArrayList().indexOf(showFolderCheckBoxMenuItem);
-				viewGroups.removeTab(index);
-			}
-			if(viewGroups.getComponentCount() < 1) {
-				// 如果视图组为空,则关闭视图组
-				viewGroups.setVisible(false);
-				horizontalJSplitPane.setDividerSize(0);
-			}
-		}
-	}
 	public void showViewGroups() {
-		// 显示:视图组
-		// 根据window.ViewsModular.showViewGroupsCheckBoxMenuItem的状态判断打开或关闭视图组
-		if(window.getViewsModular().getShowViewGroupsCheckBoxMenuItem().getState()) {
-			// 打开视图组
-			viewGroups.setVisible(true);
-			horizontalJSplitPane.setDividerLocation(horizontalDividerLocation);
-			horizontalJSplitPane.setDividerSize(DividerSize);
-		}else {
-			// 关闭视图组
-			viewGroups.setVisible(false);
-			horizontalJSplitPane.setDividerSize(0);
-			// 如果左侧视图组内存在内容,应全部关闭
-			viewGroups.removeAllTab();
-		}
+		// 打开视图组
+		viewGroups.setVisible(true);
+		horizontalJSplitPane.setDividerLocation(horizontalDividerLocation);
+		horizontalJSplitPane.setDividerSize(DividerSize);
+	}
+	public void closeViewGroups() {
+		// 关闭视图组
+		viewGroups.setVisible(false);
+		horizontalJSplitPane.setDividerSize(0);
 	}
 	
 	
@@ -214,9 +170,5 @@ public class Workplace {
 
 	public ViewGroups getViewGroups() {
 		return viewGroups;
-	}
-
-	public void setViewGroups(ViewGroups viewGroups) {
-		this.viewGroups = viewGroups;
 	}
 }

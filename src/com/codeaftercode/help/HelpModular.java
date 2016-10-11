@@ -27,8 +27,9 @@ public class HelpModular {
 
 		//向监听器注册事件
 		aboutMenuItem.addActionListener(viewsModularActionListener);
-		
-		//向窗体的JMenuBar添加本菜单
-		window.getJMenuBar().add(helpMenu);
+	}
+
+	public MyJMenu getHelpMenu() {
+		return helpMenu;
 	}
 }

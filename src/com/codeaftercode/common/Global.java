@@ -19,8 +19,19 @@ public class Global {
 	public static Color LineNumber_DEFAULT_FOREGROUD = new Color(0xA49C9C);
 	
 	public static String charset = System.getProperty("file.encoding");
-	public static String currentFolder = new File("").getAbsoluteFile().toString();
+	//public static String currentFolder = new File("").getAbsoluteFile().toString();
+	public static String currentFolder = new File("D:\\CodeHub测试区\\").getAbsolutePath().toString();
 	public static enum FileType {
 		txt,ini,inf,h,c,cpp,bat,md,markdown,css,js,html,htm,php,asp,asm,json,xml,lock,yml,gitignore,gitattributes;
 	}
+
+	// 常用字符集
+	public static String[] Charset = {"UTF-8", "GB2312", "WINDOWS"};
+	
+	
+	public static String getExtName(String s) {
+        int i = s.indexOf('.');
+        int leg = s.length();
+        return (i > 0 ? (i + 1) == leg ? "" : s.substring(i, s.length()) : "").toLowerCase();
+    }
 }

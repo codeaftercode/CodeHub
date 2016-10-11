@@ -4,63 +4,59 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FileModularActionListener implements ActionListener {
-	private FileModular fileModualr;
+	private FileModular fileModular;
 	
 	public FileModularActionListener(FileModular fileModualr) {
 		super();
-		this.fileModualr = fileModualr;
+		this.fileModular = fileModualr;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		if(source == fileModualr.newTextMenuItem) {
+		if(source == fileModular.newTextMenuItem) {
 			// 新建纯文本文件
-			fileModualr.newText();
+			fileModular.newText();
 			return;
 		}
-		if(source == fileModualr.openMenuItem) {
-			fileModualr.openFile();
+		if(source == fileModular.openMenuItem) {
+			// 打开文件
+			fileModular.openFile();
 			return;
 		}
-		if(source == fileModualr.openFolderMenuItem) {
+		if(source == fileModular.openFolderMenuItem) {
 			// 打开文件夹
-			fileModualr.openFolder();
+			fileModular.openFolder();
 			return;
 		}
-		if(source == fileModualr.saveMenuItem) {
+		if(source == fileModular.saveMenuItem) {
 			// 保存
-			fileModualr.saveFile();
+			fileModular.saveFile();
 			return;
 		}
-		if(source == fileModualr.saveWithEncodingMenuItem) {
-			// 以指定编码保存
-			
-			return;
-		}
-		if(source == fileModualr.saveAsMenuItem) {
+		if(source == fileModular.saveAsMenuItem) {
 			// 另存为
-			fileModualr.saveAs();
+			fileModular.saveAs();
 			return;
 		}
-		if(source == fileModualr.saveAllMenuItem) {
+		if(source == fileModular.saveAllMenuItem) {
 			// 全部保存
-			
+			fileModular.savaAll();
 			return;
 		}
-		if(source == fileModualr.closeFileMenuItem) {
+		if(source == fileModular.closeFileMenuItem) {
 			// 关闭
-			
+			fileModular.closeFile();
 			return;
 		}
-		if(source == fileModualr.closeAllFileMenuItem) {
+		if(source == fileModular.closeAllFileMenuItem) {
 			// 全部关闭
-			
+			fileModular.closeAllFile();
 			return;
 		}
-		if(source == fileModualr.exitMenuItem) {
+		if(source == fileModular.exitMenuItem) {
 			// 退出
-			
+			fileModular.exit();
 			return;
 		}
 

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 
 import javax.swing.ImageIcon;
@@ -12,6 +14,7 @@ import javax.swing.JMenuBar;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
+import com.codeaftercode.document.DocumentModular;
 import com.codeaftercode.edit.EditModular;
 import com.codeaftercode.file.FileModular;
 import com.codeaftercode.help.HelpModular;
@@ -48,13 +51,14 @@ public class Window extends JFrame {
 	/*********** 工具栏 *************/
 	// 工具栏:未定义
 	/*********** 状态栏 *************/
-	StatusBar statusBar;
+	public static StatusBar statusBar;
 	/*********** 菜单栏 *************/
 	// 菜单条
 	JMenuBar jMenuBar;
 	// 菜单:
 	FileModular fileModular;
 	EditModular editModular;
+	DocumentModular documentModular;
 	ToolsModular toolsModular;
 	ViewsModular viewsModular;
 	HelpModular helpModular;
@@ -80,7 +84,12 @@ public class Window extends JFrame {
 		// 设置窗口最小尺寸
 		// setMinimumSize(new Dimension(250,150));
 		// 设置关闭按钮
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				fileModular.exit();
+			}
+		});
 	}
 	
 	/**
@@ -93,23 +102,21 @@ public class Window extends JFrame {
 		windowActionListener = new WindowActionListener(this);
 
 		/*********** 菜单栏 *************/
-		// 菜单栏
-		jMenuBar = new JMenuBar();
 		// 设置窗体菜单栏
-		super.setJMenuBar(jMenuBar);
+		super.setJMenuBar(jMenuBar = new JMenuBar());
 		// 菜单:
-		fileModular = new FileModular(this);
-		editModular = new EditModular(this);
-		toolsModular = new ToolsModular(this);
-		viewsModular = new ViewsModular(this);
-		helpModular = new HelpModular(this);
+		jMenuBar.add((fileModular = new FileModular(this)).getFilesMenu());
+		jMenuBar.add((editModular = new EditModular(this)).getEditMenu());
+		jMenuBar.add((documentModular = new DocumentModular(this)).getDocumentMenu());
+		jMenuBar.add((toolsModular = new ToolsModular(this)).getToolsMenu());
+		jMenuBar.add((viewsModular = new ViewsModular(this)).getViewsMenu());
+		jMenuBar.add((helpModular = new HelpModular(this)).getHelpMenu());
 
 		/*********** 主工作区 *************/
 		workplace = new Workplace(this);
 
 		/*********** 状态栏 *************/
-		statusBar = new StatusBar(this);
-		this.add(statusBar,BorderLayout.SOUTH);
+		this.add(statusBar = new StatusBar(this),BorderLayout.SOUTH);
 		
 
 		// 监听改变窗体大小事件
@@ -185,40 +192,28 @@ public class Window extends JFrame {
 	}
 	
 	
+	public FileModular getFileModular() {
+		return fileModular;
+	}
+
 	public ViewsModular getViewsModular() {
 		return viewsModular;
 	}
-
-	public void setViewsModular(ViewsModular viewsModular) {
-		this.viewsModular = viewsModular;
+	
+	public DocumentModular getDocumentModular() {
+		return documentModular;
 	}
 
 	public Workplace getWorkplace() {
 		return workplace;
 	}
 
-	public void setWorkplace(Workplace workplace) {
-		this.workplace = workplace;
-	}
-
-	/**
-	 * Getters and Setters 
-	 */
-				
 	public JMenuBar getjMenuBar() {
 		return jMenuBar;
 	}
 
-	public void setjMenuBar(JMenuBar jMenuBar) {
-		this.jMenuBar = jMenuBar;
-	}
-
 	public StatusBar getStatusBar() {
 		return statusBar;
-	}
-
-	public void setStatusBar(StatusBar statusBar) {
-		this.statusBar = statusBar;
 	}
 
 	public int getNewFileCounter() {

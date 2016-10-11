@@ -31,8 +31,9 @@ public class ToolsModular {
 		
 		//向监听器注册事件
 		highlightMenuItem.addActionListener(editModularActionListener);
-		
-		//向窗体的JMenuBar添加本菜单
-		window.getJMenuBar().add(toolsMenu);
+	}
+
+	public MyJMenu getToolsMenu() {
+		return toolsMenu;
 	}
 }

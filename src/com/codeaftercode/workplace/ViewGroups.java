@@ -12,6 +12,7 @@ import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -19,6 +20,7 @@ import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -38,13 +40,15 @@ import com.codeaftercode.common.Window;
  */
 public class ViewGroups extends JTabbedPane {
 	private static final long serialVersionUID = 1L;
-	private List<Boolean> closable;
+	private List<Boolean> closable;					//	改为不可重复的集合
 	private boolean showClose;
 	private Color colorNorth = new Color(57, 181, 215);
 	private Color colorSouth = new Color(145, 232, 255);
 	private Color colorBorder = new Color(90, 154, 179);
 	private Window window;
 	private ArrayList<MyJCheckBoxMenuItem> arrayList; // 为关闭时能修改View菜单下的菜单项,设置本成员
+	
+	private FileTreePanel fileTreePanel;
 
 	/**
 	 * 构造方法
@@ -75,20 +79,74 @@ public class ViewGroups extends JTabbedPane {
 		closable = new Vector<Boolean>(0);
 		setUI(new ViewGroupsUI());
 	}
+	
+
+	public void openFolder() {
+		// 弹出选择对话框
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);// 只能选择文件,不能选文件夹
+		jfc.showOpenDialog(window);
+		File folder = jfc.getSelectedFile();
+
+		// 取消打开操作
+		if (folder == null || !folder.isDirectory()) {
+			return;
+		}
+
+		// 打开文件夹
+		MyJCheckBoxMenuItem showFolderCheckBoxMenuItem = window.getViewsModular().getShowFolderCheckBoxMenuItem();
+		fileTreePanel = new FileTreePanel(window, folder);
+
+		if(getArrayList().contains(showFolderCheckBoxMenuItem)) {
+			// 如果存在已经打开的文件夹,不要重复打开,确保viewGroups.arrayList中不含重复项,否则关闭时可能出错
+			// 好像不用删除也会自动去除重复
+			removeTabAt(getArrayList().indexOf(showFolderCheckBoxMenuItem));
+		}
+		addTab("文件夹", null, fileTreePanel, null, true, showFolderCheckBoxMenuItem);
+		
+		// 显示文件夹
+		window.getViewsModular().getShowFolderCheckBoxMenuItem().setState(true);
+		showFolder();
+		// 状态栏:
+		Window.statusBar.getLabel().setText(folder.getAbsolutePath());
+	}
+	
+	public void showFolder() {
+		// 显示或关闭文件夹
+		MyJCheckBoxMenuItem showFolderCheckBoxMenuItem = window.getViewsModular().getShowFolderCheckBoxMenuItem();
+		if(showFolderCheckBoxMenuItem != null && showFolderCheckBoxMenuItem.getState()) {
+			// 显示文件夹
+			// 如果视图组被关闭,应先打开视图组
+			if(!isVisible()) {
+				window.getWorkplace().showViewGroups();
+			}
+			if(fileTreePanel != null) {
+				fileTreePanel.setVisible(true);
+			}
+		}else {
+			// 关闭文件夹
+			if(fileTreePanel != null) {
+				fileTreePanel.setVisible(false);
+				fileTreePanel = null;
+				this.remove(fileTreePanel);
+				Window.statusBar.getLabel().setText("关闭文件夹");
+			}
+			// 如果视图组内不含任何视图,则关闭视图组
+			if(getComponentCount() < 1) {
+				window.getWorkplace().closeViewGroups();
+				//Window.statusBar.getLabel().setText("关闭视图组");
+			}
+		}
+	}
 
 	/**
 	 * 加入组件
 	 * 
-	 * @param title
-	 *            标题
-	 * @param icon
-	 *            图标
-	 * @param component
-	 *            组件
-	 * @param tip
-	 *            提示信息:用来指示ViewMenuItem下对应项.以后改用枚举
-	 * @param closabel
-	 *            是否可关闭
+	 * @param title 标题
+	 * @param icon 图标
+	 * @param component 组件
+	 * @param tip 提示信息:用来指示ViewMenuItem下对应项.以后改用枚举
+	 * @param closabel 是否可关闭
 	 */
 	public void addTab(String title, Icon icon, Component component, String tip, boolean closable,
 			MyJCheckBoxMenuItem myJCheckBoxMenuItem) {
@@ -106,11 +164,9 @@ public class ViewGroups extends JTabbedPane {
 
 	/**
 	 * 移除组件
-	 * 
-	 * @param index
-	 *            组件序号
+	 * @param index 组件序号
 	 */
-	public void removeTab(int index) {
+	public void removeTabAt(int index) {
 		if(index < 0) {
 			return;
 		}
@@ -129,7 +185,23 @@ public class ViewGroups extends JTabbedPane {
 		window.getStatusBar().getLabel().setText("关闭" + jCheckBoxMenuItem.getText());
 		// 列表中移除此菜单项
 		arrayList.remove(index);
-
+	}
+	
+	 public void remove(Component component) {
+		int index = indexOfComponent(component);
+		if (index != -1) {
+			removeTabAt(index);
+		} else {
+			// Container#remove(comp) invokes Container#remove(int)
+			// so make sure JTabbedPane#remove(int) isn't called here
+			Component children[] = getComponents();
+			for (int i = 0; i < children.length; i++) {
+				if (component == children[i]) {
+					super.remove(i);
+					break;
+				}
+			}
+		}
 	}
 	
     /**
@@ -143,7 +215,7 @@ public class ViewGroups extends JTabbedPane {
 
         int tabCount = getTabCount();
         while (tabCount-- > 0) {
-            removeTab(tabCount);
+            removeTabAt(tabCount);
         }
     }
 
@@ -227,7 +299,7 @@ public class ViewGroups extends JTabbedPane {
 					for (int i = 0; i < getTabCount(); i++) {
 						// 关闭选项卡
 						if (closeRects[i].contains(e.getPoint()) && closable.get(i)) {
-							removeTab(i);
+							removeTabAt(i);
 						}
 					}
 				}
